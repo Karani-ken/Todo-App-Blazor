@@ -1,0 +1,55 @@
+﻿@page "/"
+<div class="row mx-5 ">
+    <div class="col-4">
+        <CreateTask CreateNewTask="CreateNewTask"/>
+   </div>
+   <div class="col-8">
+       <div class="row">
+            @foreach(var task in Tasks)
+        {
+       
+              <TaskDisplay taskDto="task" DeleteTaskId="DeleteTaskId" UpdateTaskId="UpdateTaskId"/>
+            
+        }
+       </div>
+         
+   </div>
+      
+      
+   
+
+</div>
+
+@code {
+    private List<TaskDto> Tasks = new List<TaskDto>();
+    public void CreateNewTask(TaskDto task)
+    {
+        this.Tasks.Add(task);
+    }
+    public void UpdateTaskId(TaskDto task)
+    {
+        var indexOfTask = this.Tasks.FindIndex(x => x.TaskId == task.TaskId);
+        try
+        {
+            Tasks[indexOfTask] = task;
+            task = null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+       
+    }
+    public void DeleteTaskId(Guid id)
+    {
+        var TaskToDelete = this.Tasks.Find(x => x.TaskId == id);
+        try
+        {
+            this.Tasks.Remove(TaskToDelete);
+        }catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+  
+}

@@ -1,0 +1,57 @@
+﻿<div class="form-group">
+    <label for="Title">Title</label>
+    <input type="text" class="form-control" @bind-value="@task.Title" id="Title" placeholder="Task Title">
+</div>
+<div class="form-group">
+    <label for="Description">Description</label>
+    <input type="text" class="form-control" @bind-value="@task.Description"  id="Description" placeholder="Task Description">
+</div>
+
+<button @onclick="SaveTask" class="mt-4  btn btn-primary">@saveButtonText</button>
+     
+
+@code {
+    /* create a new Task*/
+    public TaskDto task = new TaskDto();
+
+    private string saveButtonText = "Add Task";
+
+
+    [Parameter]
+    public EventCallback<TaskDto> CreateNewTask { get; set; }
+
+    
+
+    [Parameter]
+    public TaskDto EditTask { get; set; }
+
+    //called when the component is initialized
+    protected override void OnInitialized()
+    {
+        if(EditTask != null)
+        {
+            //means the task exists
+           this.task = EditTask;
+            saveButtonText = "Update Task";
+
+        }
+    }
+    public async Task SaveTask()
+    {
+        if(EditTask != null)
+        {
+            //edits an existing task
+           task = EditTask;
+           
+        }
+        else
+        {
+            //creates a new Task
+            task = new TaskDto()
+            {
+                TaskId = Guid.NewGuid()
+            };
+            await CreateNewTask.InvokeAsync(task);
+        }
+    }
+}
