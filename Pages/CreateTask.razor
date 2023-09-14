@@ -1,57 +1,79 @@
-﻿<div class="form-group">
+﻿@* @inject IToastService toast *@
+@inject IToastService ToastService;
+<div class="form-group">
     <label for="Title">Title</label>
-    <input type="text" class="form-control" @bind-value="@task.Title" id="Title" placeholder="Task Title">
+    <input type="text" class="form-control" @bind-value="@newTask.Title" id="Title" placeholder="Task Title">
 </div>
 <div class="form-group">
     <label for="Description">Description</label>
-    <input type="text" class="form-control" @bind-value="@task.Description"  id="Description" placeholder="Task Description">
+    <input type="text" class="form-control" @bind-value="@newTask.Description"  id="Description" placeholder="Task Description">
 </div>
 
-<button @onclick="SaveTask" class="mt-4  btn btn-primary">@saveButtonText</button>
+<button @onclick="@(isEditing ? EditTask : SaveTask)" class="mt-4  btn btn-primary">
+    @if (isEditing)
+    {
+        <p>Edit Task</p>
+    }
+    else
+    {
+        <p>Add Task</p>
+    }
+</button>
      
 
 @code {
-    /* create a new Task*/
-    public TaskDto task = new TaskDto();
+    private bool isEditing=false;
 
-    private string saveButtonText = "Add Task";
+    /* create a new Task*/
+    public TaskDto newTask = new TaskDto()
+        {
+            TaskId = Guid.NewGuid()
+        };
 
 
     [Parameter]
     public EventCallback<TaskDto> CreateNewTask { get; set; }
 
-    
+    [Parameter]
+    public EventCallback<TaskDto> UpdateTask { get; set; }
 
     [Parameter]
-    public TaskDto EditTask { get; set; }
-
-    //called when the component is initialized
-    protected override void OnInitialized()
+    public TaskDto EditTaskProp
     {
-        if(EditTask != null)
+        get => newTask;
+        set
         {
-            //means the task exists
-           this.task = EditTask;
-            saveButtonText = "Update Task";
-
+            newTask = value;
+            isEditing = value != null;
         }
+    }
+    //called when the component is initialized
+
+    public async Task EditTask()
+    {
+        await UpdateTask.InvokeAsync(newTask);
+        await ToastService.AddToastAsync(
+                   message: "Task Updated",
+                   type: "info",
+                   animation: "fade",
+                   autoClose: 3000
+       );
+        newTask = new TaskDto();
+        // toast.ShowInfo("Task Updated");
+      
     }
     public async Task SaveTask()
     {
-        if(EditTask != null)
-        {
-            //edits an existing task
-           task = EditTask;
-           
-        }
-        else
-        {
-            //creates a new Task
-            task = new TaskDto()
-            {
-                TaskId = Guid.NewGuid()
-            };
-            await CreateNewTask.InvokeAsync(task);
-        }
+            await CreateNewTask.InvokeAsync(newTask);
+        await ToastService.AddToastAsync(
+                  message: "Task Created",
+                  type: "success",
+                  animation: "fade",
+                  autoClose: 3000
+      );
+            newTask = new TaskDto();
+            // toast.ShowSuccess("Task Created");
+         
+       
     }
 }

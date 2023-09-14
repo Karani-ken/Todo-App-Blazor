@@ -1,11 +1,14 @@
-﻿<div class="m-3 shadow-lg shadow-black p-3  text-center text-white rounded-3" style="Width: 15rem;background-color: rgb(74 222 128);">
+﻿@* @inject IToastService toast *@
+@inject IToastService ToastService;
+<div class="m-3 shadow-lg shadow-black p-3  text-center text-white rounded-3" style="Width: 15rem;background-color: rgb(74 222 128);">
     <h3 class="font-black">@taskDto.Title</h3>
     <p class="text-sm text-gray font-black">@taskDto.Description</p>
-   
+    
     <div class="d-grid row-2">
         <button @onclick="DeleteTask" class="mt-4  btn btn-danger">Delete</button>
-        <button @onclick="UpdateTask" class="mt-4  btn btn-secondary">Edit</button>
+        <button @onclick="(() => EditTask(taskDto))" class="mt-4  btn btn-secondary">Edit</button>
     </div>
+    
 </div>
   
 
@@ -13,21 +16,30 @@
     [Parameter]
     public TaskDto taskDto { get; set; }
 
+
     [Parameter]
     public EventCallback<Guid> DeleteTaskId { get; set; }
-
     [Parameter]
-    public EventCallback<TaskDto> UpdateTaskId { get; set; }
+    public EventCallback<TaskDto> UpdateTask { get; set; }
 
-     public async Task UpdateTask()
+
+    public async Task EditTask(TaskDto task)
     {
-        await UpdateTaskId.InvokeAsync(taskDto);
-    }
 
+        await UpdateTask.InvokeAsync(task);
+    }
 
     public async Task DeleteTask()
     {
         await DeleteTaskId.InvokeAsync(taskDto.TaskId);
+        // toast.ShowWarning("Task was Deleted");
+        await ToastService.AddToastAsync(
+                     message: "Task Delete",
+                     type: "warning",
+                     animation: "fade",
+                     autoClose: 3000
+         );
     }
   
+
 }

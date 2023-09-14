@@ -1,44 +1,56 @@
 ﻿@page "/"
 <div class="row mx-5 ">
     <div class="col-4">
-        <CreateTask CreateNewTask="CreateNewTask"/>
+        @if(SelectedTask != null)
+        {
+            <CreateTask UpdateTask="UpdateTask" EditTaskProp="SelectedTask" />
+        }
+        else
+        {
+            <CreateTask CreateNewTask="CreateNewTask" UpdateTask="UpdateTask" />
+        }
+       
    </div>
    <div class="col-8">
        <div class="row">
             @foreach(var task in Tasks)
         {
        
-              <TaskDisplay taskDto="task" DeleteTaskId="DeleteTaskId" UpdateTaskId="UpdateTaskId"/>
+              <TaskDisplay taskDto="task" DeleteTaskId="DeleteTaskId" UpdateTask="UpdateTask"/>
             
         }
        </div>
          
-   </div>
-      
-      
+   </div>  
    
 
 </div>
 
 @code {
-    private List<TaskDto> Tasks = new List<TaskDto>();
+    private List<TaskDto> Tasks = new List<TaskDto>()
+    {
+        new TaskDto()
+        {
+            TaskId=Guid.NewGuid(),
+            Title = "Eats",
+            Description="Some desc"
+        },
+         new TaskDto()
+        {
+            TaskId=Guid.NewGuid(),
+            Title = "sleep",
+            Description="Some desc"
+        }
+    };
     public void CreateNewTask(TaskDto task)
     {
         this.Tasks.Add(task);
     }
-    public void UpdateTaskId(TaskDto task)
+    private TaskDto SelectedTask;
+    public void UpdateTask(TaskDto task)
     {
-        var indexOfTask = this.Tasks.FindIndex(x => x.TaskId == task.TaskId);
-        try
-        {
-            Tasks[indexOfTask] = task;
-            task = null;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-       
+        SelectedTask = task;
+
     }
     public void DeleteTaskId(Guid id)
     {
